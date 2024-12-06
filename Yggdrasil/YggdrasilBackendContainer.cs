@@ -31,7 +31,7 @@ internal sealed class YggdrasilBackendContainer : IYggdrasilContainer
         _bridge.AddWire<T>();
     }
 
-    public T? GetWire<T>() where T : class
+    public T GetWire<T>() where T : class
     {
         if (_protocolType == WireProtocol.HTTP)
         {

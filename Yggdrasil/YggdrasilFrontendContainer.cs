@@ -36,7 +36,7 @@ internal sealed class YggdrasilFrontendContainer : IYggdrasilContainer
         _bridge.AddWire<T>();
     }
 
-    public T? GetWire<T>() where T : class
+    public T GetWire<T>() where T : class
     {
         return _bridge.GetWire<T>();
     }

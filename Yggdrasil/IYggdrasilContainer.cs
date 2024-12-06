@@ -28,7 +28,7 @@ public interface IYggdrasilContainer
     /// <returns>
     /// The wire of the given type or <see langword="null"/> if no wire of the given type is registered.
     /// </returns>
-    T? GetWire<T>() where T : class;
+    T GetWire<T>() where T : class;
     
     /// <summary>
     /// Starts the yggdrasil system.

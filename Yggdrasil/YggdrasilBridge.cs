@@ -44,7 +44,7 @@ internal class YggdrasilBridge
         }
     }
     
-    internal T? GetWire<T>() where T : class
+    internal T GetWire<T>() where T : class
     {
         var interfaceType = typeof(T);
         if (!interfaceType.IsInterface)
@@ -58,7 +58,7 @@ internal class YggdrasilBridge
             return wire;
         }
         
-        return null;
+        throw new InvalidOperationException($"Failed to cast {resource} to {interfaceType}");
     }
 
     private object? OnWireRequest(string id, JsonArray args)
