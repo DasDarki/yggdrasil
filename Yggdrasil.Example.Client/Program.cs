@@ -9,6 +9,7 @@ var calculator = connector.GetWire<ICalculator>();
 Console.WriteLine("Current Calcs: " + calculator.Calcs);
 
 Console.WriteLine(calculator.Add(1, 2));
+Console.WriteLine(await calculator.SubtractAsync(5, 10));
 
 Console.WriteLine("Current Calcs: " + calculator.Calcs);
 

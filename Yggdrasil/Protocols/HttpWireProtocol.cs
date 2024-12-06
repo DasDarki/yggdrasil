@@ -64,8 +64,15 @@ internal sealed class HttpWireProtocol : IWireProtocol
         
         var res = _httpClient.PostAsync($"/.well-known/@yggdrasil/{id}/wire", new StringContent(jargs.ToJsonString(), Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
         res.EnsureSuccessStatusCode();
-        
-        return returnValue == null ? null : JsonSerializer.Deserialize(res.Content.ReadAsStream(), returnValue);
+
+        try
+        {
+            return returnValue == null ? null : JsonSerializer.Deserialize(res.Content.ReadAsStream(), returnValue);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException("Failed to deserialize response: '" + res.Content.ReadAsStringAsync().GetAwaiter().GetResult() + "'", ex);
+        }
     }
 
     private async Task OnHandleWireRequestAsync(HttpContextBase ctx)
@@ -99,6 +106,13 @@ internal sealed class HttpWireProtocol : IWireProtocol
             }
             
             var result = OnWireableResourceRequested?.Invoke(id, args);
+            if (result is Task task)
+            {
+                await task;
+                var property = task.GetType().GetProperty("Result");
+                result = property?.GetValue(task);
+            }
+            
             ctx.Response.ContentType = "application/json";
             await ctx.Response.Send(result?.ToString() ?? "null");
         }

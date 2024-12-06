@@ -12,10 +12,10 @@ public class Calculator : ICalculator
         return a + b;
     }
 
-    public int Subtract(int a, int b)
+    public Task<int> SubtractAsync(int a, int b)
     {
         Calcs++;
-        return a - b;
+        return Task.FromResult(a - b);
     }
 
     public int Multiply(int a, int b)

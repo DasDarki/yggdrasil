@@ -42,4 +42,16 @@ public interface IWireProtocol
     /// <param name="returnValue">The type of the return value.</param>
     /// <returns>The response of the wireable resource.</returns>
     object? SendOverWire(string id, object?[] args, Type? returnValue);
+
+    /// <summary>
+    /// See <see cref="SendOverWire"/> but asynchronous.
+    /// </summary>
+    Task<T?> SendOverWireAsync<T>(string id, object?[] args, Type? returnValue)
+    {
+        return Task.Run(() =>
+        {
+            var ret = SendOverWire(id, args, returnValue);
+            return ret == null ? default : (T)ret;
+        });
+    }
 }

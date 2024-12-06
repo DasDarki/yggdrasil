@@ -63,16 +63,24 @@ internal static class WireableResourceBuilder
                 emitter.StoreElement<object>();
             }
                 
-            emitter.LoadConstant(method.ReturnType);
+            emitter.LoadConstant(UnwrapTaskType(method.ReturnType) ?? typeof(void));
             emitter.Call(typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));
-            emitter.CallVirtual(typeof(IWireProtocol).GetMethod(nameof(IWireProtocol.SendOverWire)));
-                
-            if (method.ReturnType == typeof(void))
+            
+            if (method.ReturnType == typeof(Task))
             {
+                emitter.CallVirtual(typeof(IWireProtocol).GetMethod(nameof(IWireProtocol.SendOverWire)));
                 emitter.Pop();
+                emitter.LoadNull();
+            }
+            else if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                var returnType = method.ReturnType.GetGenericArguments()[0];
+                emitter.CallVirtual(typeof(IWireProtocol).GetMethod(nameof(IWireProtocol.SendOverWireAsync))?.MakeGenericMethod(returnType));
             }
             else
             {
+                emitter.CallVirtual(typeof(IWireProtocol).GetMethod(nameof(IWireProtocol.SendOverWire)));
+
                 if (method.ReturnType.IsValueType)
                 {
                     emitter.UnboxAny(method.ReturnType);
@@ -101,4 +109,19 @@ internal static class WireableResourceBuilder
             typeName,
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed);
     }
+
+    private static Type? UnwrapTaskType(Type? type)
+    {
+        if (type == null)
+        {
+            return null;
+        }
+        
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
+        {
+            return type.GetGenericArguments()[0];
+        }
+        
+        return type == typeof(Task) ? null : type;
+    } 
 }
